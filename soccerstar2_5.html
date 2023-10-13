@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="fr ">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>soccerstar</title>
+    <style>
+      body {
+        background-color: rgb(0, 115, 0);
+        overflow: hidden;
+      }
+      .container {
+        display: flex;
+        justify-content: center;
+      }
+      .terrain {
+        padding: 0;
+        margin: auto;
+        display: block;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgb(0, 115, 0);
+      }
+    </style>
+  </head>
+  <body
+    onload="dessine()"
+    onmousedown="clickIn(event.clientX,event.clientY)"
+    onmouseup="shoot(event.clientX,event.clientY)"
+    onmousemove="circle_arrow(event.clientX, event.clientY)"
+  >
+    <div class="container">
+      <canvas
+        width="1200px"
+        height="840px"
+        id="terrain"
+        class="terrain"
+      ></canvas>
+    </div>
+
+    <script>
+      const c = document.getElementById("terrain");
+      const ctx = c.getContext("2d");
+      var chrono = setInterval(time, 15);
+      var selected = [];
+      var distance_x;
+      var distance_y;
+      var timer;
+      var ca;
+      var ca_auto = false;
+      var compteur = 0;
+      var norme;
+      var number;
+      var score1 = 0;
+      var score2 = 0;
+      var round = 1;
+      var temps = 13;
+      var movement = false;
+      var expoints1 = localStorage.getItem("points1");
+      var expoints2 = localStorage.getItem("points2");
+      localStorage.removeItem("points1");
+      localStorage.removeItem("points2");
+      
+
+
+      function terrain() {
+        ctx.beginPath();
+        ctx.strokeStyle = "rgb(0, 125, 0)";
+        ctx.fillStyle = "rgb(0, 125, 0)";
+        ctx.fillRect(100, 105, 142.857, 630);
+        ctx.fillRect(385.714, 105, 142.857, 630);
+        ctx.fillRect(671.428, 105, 142.857, 630);
+        ctx.fillRect(957.142, 105, 142.857, 630);
+        ctx.closePath();
+
+        ctx.beginPath();
+        ctx.moveTo(600, 105);
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = "white";
+        ctx.lineTo(600, 735);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(600, 420, 91.5, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(600, 420, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = "white";
+        ctx.fill();
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(100, 245);
+        ctx.lineTo(265, 245);
+        ctx.lineTo(265, 595);
+        ctx.lineTo(100, 595);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(1100, 245);
+        ctx.lineTo(935, 245);
+        ctx.lineTo(935, 595);
+        ctx.lineTo(1100, 595);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(210, 420, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = "white";
+        ctx.fill();
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(990, 420, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = "white";
+        ctx.fill();
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(990, 420, 91.5, 0.71 * Math.PI, 1.29 * Math.PI);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(210, 420, 91.5, 1.71 * Math.PI, 0.29 * Math.PI);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(100, 105);
+        ctx.lineTo(100, 735);
+        ctx.lineTo(1100, 735);
+        ctx.lineTo(1100, 105);
+        ctx.lineTo(100, 105);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(1100, 290);
+        ctx.lineTo(1120, 290);
+        ctx.lineTo(1120, 550);
+        ctx.lineTo(1100, 550);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(100, 290);
+        ctx.lineTo(80, 290);
+        ctx.lineTo(80, 550);
+        ctx.lineTo(100, 550);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.font="65px Cursive"
+        ctx.fillText("Player 1",100,80)
+        ctx.fillText(score1,535,80)
+        ctx.fillText("-", 585,80)
+        ctx.fillText(score2,625,80)
+        ctx.fillText("Player 2",850,80)
+
+        ctx.beginPath();
+        ctx.fillRect(round*350,37,temps*10,40)
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.rect(round*350,37,130,40)
+        ctx.stroke();
+      }
+
+      function $(arg) {
+        return document.getElementById(arg);
+      }
+
+      function Cercle(_x, _y, _r, _team, _vx, _vy) {
+        this.x = _x;
+        this.y = _y;
+        this.r = _r;
+        this.team = _team 
+        this.vx = _vx;
+        this.vy = _vy;
+        
+        if (this.team == 1){
+          this.coul = "blue";
+        }else if(this.team == 2){
+          this.coul = "red"
+        }else{this.coul="white"}
+        this.colInit = this.coul;
+
+        if (this.team == round) {
+            this.strokecol= "yellow";
+          }else{this.strokecol = "black";}
+        
+        this.dessiner = function () {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
+          ctx.fillStyle = this.coul;
+          ctx.fill();
+          ctx.strokeStyle = this.strokecol;
+          ctx.closePath();
+          ctx.stroke();
+        };
+        this.isInside = function (x, y) {
+          return (
+            Math.sqrt(Math.pow(this.x - x, 2) + Math.pow(this.y - y, 2)) <
+            this.r
+          );
+        };
+      }
+
+      function Ca_cercle(_x, _y, _r, _x1, _y1) {
+        this.dessiner = function () {
+          ctx.beginPath();
+          ctx.arc(_x, _y, _r, 0, 2 * Math.PI);
+          ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
+          ctx.fill();
+          ctx.strokeStyle = "rgba(0, 0, 0, 0.75)";
+          ctx.closePath();
+          ctx.stroke();
+          
+          ctx.beginPath();
+          ctx.moveTo(_x,_y)
+          ctx.lineTo(_x1,_y1)
+          ctx.closePath();
+          ctx.stroke();
+        };
+      }
+      
+      var listeCercles = [];
+      circle_creation();
+      function circle_creation() {
+        listeCercles = [];
+        listeCercles.push(new Cercle(600, 420, 20, 0, 0, 0));
+        
+        if (expoints1 == 0 || expoints1 == 1) {
+          listeCercles.push(new Cercle(350, 420, 27, 1, 0, 0))
+        }
+
+        if (expoints1 == 2) {
+          listeCercles.push(new Cercle(300, 420, 27, 1, 0, 0));
+          listeCercles.push(new Cercle(400, 420, 27, 1, 0, 0));
+        }
+
+        if (expoints1 == 3) {
+          listeCercles.push(new Cercle(300, 320, 27, 1, 0, 0));
+          listeCercles.push(new Cercle(-3, -3, 1, 1, 0, 0));
+          listeCercles.push(new Cercle(300, 520, 27, 1, 0, 0));
+          listeCercles.push(new Cercle(425, 420, 27, 1, 0, 0));
+        }
+
+        if (expoints1 == 4) {
+          listeCercles.push(new Cercle(200, 420, 27, 1, 0, 0));
+          listeCercles.push(new Cercle(325, 540, 27, 1, 0, 0));
+          listeCercles.push(new Cercle(-3, -3, 1, 1, 0, 0));
+          listeCercles.push(new Cercle(325, 300, 27, 1, 0, 0));
+          listeCercles.push(new Cercle(450, 420, 27, 1, 0, 0));
+        }
+
+        if (expoints1 == 5) {
+          listeCercles.push(new Cercle(200, 340, 27, 1, 0, 0));
+          listeCercles.push(new Cercle(325, 600, 27, 1, 0, 0));
+          listeCercles.push(new Cercle(-3, -3, 1, 1, 0, 0));
+          listeCercles.push(new Cercle(325, 240, 27, 1, 0, 0));
+          listeCercles.push(new Cercle(450, 420, 27, 1, 0, 0));
+          listeCercles.push(new Cercle(200, 500, 27, 1, 0, 0));
+        }
+
+
+        if (expoints2 == 0 || expoints2 == 1) {
+          listeCercles.push(new Cercle(850, 420, 27, 2, 0, 0))
+        }
+
+        if (expoints2 == 2) {
+          listeCercles.push(new Cercle(900, 420, 27, 2, 0, 0));
+          listeCercles.push(new Cercle(800, 420, 27, 2, 0, 0));
+        }
+
+        if (expoints2 == 3) {
+          listeCercles.push(new Cercle(900, 320, 27, 2, 0, 0));
+          listeCercles.push(new Cercle(-3, -3, 1, 1, 0, 0));
+          listeCercles.push(new Cercle(900, 520, 27, 2, 0, 0));
+          listeCercles.push(new Cercle(775, 420, 27, 2, 0, 0));
+        }
+
+        if (expoints2 == 4) {
+          listeCercles.push(new Cercle(1000, 420, 27, 2, 0, 0));
+          listeCercles.push(new Cercle(875, 540, 27, 2, 0, 0));
+          listeCercles.push(new Cercle(-3, -3, 1, 1, 0, 0));
+          listeCercles.push(new Cercle(875, 300, 27, 2, 0, 0));
+          listeCercles.push(new Cercle(750, 420, 27, 2, 0, 0));
+        }
+
+        if (expoints2 == 5) {
+          listeCercles.push(new Cercle(1000, 340, 27, 2, 0, 0));
+          listeCercles.push(new Cercle(875, 600, 27, 2, 0, 0));
+          listeCercles.push(new Cercle(-3, -3, 1, 1, 0, 0));
+          listeCercles.push(new Cercle(875, 240, 27, 2, 0, 0));
+          listeCercles.push(new Cercle(750, 420, 27, 2, 0, 0));
+          listeCercles.push(new Cercle(1000, 500, 27, 2, 0, 0));
+        }
+
+      }
+      
+      var liste_ca_cercle = [];
+
+      function refresh() {
+        ctx.clearRect(0, 0, c.width, c.height);
+        terrain();
+      }
+
+      function dessine() {
+        refresh();
+        for (var i in listeCercles) {
+          listeCercles[i].dessiner();
+        }
+        for (var i in liste_ca_cercle) {
+          liste_ca_cercle[i].dessiner();
+        }
+      }
+
+      function clickIn(x1, y1) {
+        refresh();
+        x1 = x1 - $("terrain").offsetLeft;
+        y1 = y1 - $("terrain").offsetTop;
+        movement = false;
+
+        for (var c in listeCercles) {
+          if (listeCercles[c].vx != 0 || listeCercles[c].vy != 0) {
+            movement = true;
+          }
+        }
+        for (var k in listeCercles) {
+            if (listeCercles[k].isInside(x1, y1) && listeCercles[k].team == round && movement == false) {
+              listeCercles[k].coul = "yellow";
+              listeCercles[k].selected = true;
+              ca_auto = true;
+              number = k;
+            } else {
+              listeCercles[k].coul = listeCercles[k].colInit;
+              listeCercles[k].selected = false;
+            }
+        }
+        dessine();
+      }
+
+      function shoot(x2, y2) {
+        refresh();
+        ca_auto = false;
+        x = x2 - $("terrain").offsetLeft;
+        y = y2 - $("terrain").offsetTop;
+
+        for (var k in listeCercles) {
+          if (listeCercles[k].selected == true) {
+            round+=1;
+            temps = 13;
+            if (round>2) {
+              round=1;
+            }
+            for (let index in listeCercles) {
+              if (listeCercles[index].team == round) {
+                listeCercles[index].strokecol= "yellow";
+              }else{listeCercles[index].strokecol = "black";}
+            }
+            
+            listeCercles[k].coul = listeCercles[k].colInit;
+            distance_x = x - listeCercles[k].x;
+            distance_y = y - listeCercles[k].y;
+            norme = (distance_x ** 2 + distance_y ** 2) ** (1 / 2);
+            let angle = Math.atan2(distance_y, distance_x);
+            let sin = Math.sin(angle);
+            let cos = Math.cos(angle);
+
+            if (norme>100) {
+              norme = 100;
+              distance_x = cos*norme;
+              distance_y = sin*norme;
+            }
+
+            listeCercles[k].vx = 7.5*(distance_x / norme);
+            listeCercles[k].vy = 7.5*(distance_y / norme);
+            timer = setInterval(animation, 8);
+          }
+        }
+        dessine();
+      }
+
+      function animation(kcercle) {
+        compteur += 0.5;
+        if (compteur <= norme) {
+          for (var k in listeCercles) {
+            if (
+              listeCercles[k].x - listeCercles[k].r <= 105  ||
+              listeCercles[k].x + listeCercles[k].r >= 1095)
+              if (k==0) {
+                if (listeCercles[k].y - listeCercles[k].r <= 290 ||
+                    listeCercles[k].y + listeCercles[k].r >= 550) {
+                    listeCercles[k].vx = -1 * listeCercles[k].vx;
+                }else{
+                  if (listeCercles[k].x - listeCercles[k].r <= 80 ||
+                      listeCercles[k].x + listeCercles[k].r >= 1120) {
+                      listeCercles[k].vx = -1 * listeCercles[k].vx;
+                      if (listeCercles[k].x - listeCercles[k].r <= 80) {
+                        score2+=1
+                        if (score2==3) {
+                          localStorage.setItem("winner", "Player 2");
+                          window.location.replace("final1.html") 
+                        }
+                      }
+                      if (listeCercles[k].x + listeCercles[k].r >= 1120) {
+                        score1+=1
+                        if (score1==3) {
+                          localStorage.setItem("winner", "Player 1");
+                          window.location.replace("final1.html") 
+                        }
+                      }
+                      circle_creation();
+                  }
+                  if (listeCercles[k].y - listeCercles[k].r <= 290 ||
+                      listeCercles[k].y + listeCercles[k].r >= 550  ) {
+                      listeCercles[k].vy = -1 * listeCercles[k].vy; 
+                  }
+                }
+              }else{
+              listeCercles[k].vx = -1 * listeCercles[k].vx;
+            }
+            if (
+              listeCercles[k].y - listeCercles[k].r <= 105 ||
+              listeCercles[k].y + listeCercles[k].r >= 735
+            ) {
+              listeCercles[k].vy = -1 * listeCercles[k].vy;
+            }
+            for (var n in listeCercles) {
+              if (listeCercles[n] != listeCercles[k])
+                var dx = listeCercles[n].x - listeCercles[k].x;
+                var dy = listeCercles[n].y - listeCercles[k].y;
+                var d = Math.sqrt(dx * dx + dy * dy);
+                if (d <= listeCercles[k].r + listeCercles[n].r) {
+                  var normalX = dx / d; 
+                  var normalY = dy / d; 
+                  
+                  var relativeVelocityX = listeCercles[n].vx - listeCercles[k].vx;
+                  var relativeVelocityY = listeCercles[n].vy - listeCercles[k].vy;
+                  var relativeSpeed = relativeVelocityX * normalX + relativeVelocityY * normalY;
+                  
+                  listeCercles[k].vx += relativeSpeed * normalX;
+                  listeCercles[k].vy += relativeSpeed * normalY;
+                  listeCercles[n].vx -= relativeSpeed * normalX;
+                  listeCercles[n].vy -= relativeSpeed * normalY;
+                }
+              }
+              listeCercles[k].x -= listeCercles[k].vx;
+              listeCercles[k].y -= listeCercles[k].vy;
+              listeCercles[k].vx*=0.981**(compteur/norme);
+              listeCercles[k].vy*=0.981**(compteur/norme);
+            }
+          } else {
+            clearInterval(timer);
+            for (var i in listeCercles) {
+              listeCercles[i].vx = 0;
+              listeCercles[i].vy = 0;
+            }       
+            compteur = 0;
+          }
+          dessine();
+        }
+
+      function circle_arrow(x1, y1) {
+        liste_ca_cercle.shift();
+        if (ca_auto == true) {
+          refresh();
+          let x_ca = x1 - $("terrain").offsetLeft;
+          let y_ca = y1 - $("terrain").offsetTop;
+          let dx_ca = x_ca - listeCercles[number].x;
+          let dy_ca = y_ca - listeCercles[number].y;
+          let r_ca = (dx_ca ** 2 + dy_ca ** 2) ** (1 / 2);
+          let rdt; 
+          let angle = Math.atan2(dy_ca, dx_ca);
+          let sin = Math.sin(angle);
+          let cos = Math.cos(angle);
+
+          if (r_ca > 100) {
+            r_ca = 100;
+            dx_ca = cos*r_ca;
+            dy_ca = sin*r_ca;
+          }
+
+          let x_ar=listeCercles[number].x-dx_ca;
+          let y_ar=listeCercles[number].y-dy_ca;
+          liste_ca_cercle.push(
+            new Ca_cercle(listeCercles[number].x, listeCercles[number].y, r_ca, x_ar, y_ar)
+          );
+          dessine();
+        }
+      }
+    
+      function time(){
+        temps -= 0.015;
+        dessine();
+        if (temps <= 0) {
+            round+=1;
+            temps = 13;
+            if (round>2) {
+              round=1;
+              temps = 13;
+            }
+            for (let index in listeCercles) {
+              if (listeCercles[index].team == round) {
+                listeCercles[index].strokecol= "yellow";
+              }else{listeCercles[index].strokecol = "black";}
+            }
+        }
+      }
+      
+    </script>
+  </body>
+</html>

@@ -1,0 +1,89 @@
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="tm3_7.css" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Recherche de partie</title>
+    </head>
+    <body>
+        <div class="page-container">
+            <div class="titre">
+                <h1>PenduFoot</h1>
+            </div>
+            <p id="message" class="userp"></p>
+            <div class="user">
+                <input type="text" placeholder="   Entrez un nom d'utilisateur :" id="useri">
+                <button onclick="rechercherOuCreerRoom()" id="userb"><img src="imagecdm/search.png" alt="rechercher ou creer"></button>
+            </div>
+        </div>
+
+
+        <script>
+            var time = 0
+            function rechercherOuCreerRoom() {
+                const username = document.getElementById("useri").value;
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", "server1_0.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        console.log(xhr.responseText);
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+                            if (response.gameReady) {
+                                // La room est prête, redirigez vers la page de jeu
+                                window.location.href = response.redirect_url;
+                                localStorage.setItem("userid", response.id);
+                            } else {
+                                // Affichez un message pour informer les utilisateurs qu'ils doivent attendre
+                                document.getElementById("message").textContent = "Attente du deuxième joueur...";
+                                document.getElementById("useri").style.display = "none";
+                                document.getElementById("userb").style.display = "none";
+                                document.getElementById("message").style.display = "block";
+                                // Vérifiez périodiquement si la room est prête
+                                setInterval(checkGameStatus, 1000, response.roomId, response.id);
+                                setInterval(temps, 750);
+                            }
+                        } else {
+                            document.getElementById("message").textContent = response.message;
+                        }
+                    }
+                };
+
+                const data = "username=" + encodeURIComponent(username);
+                xhr.send(data);
+            }
+
+            function checkGameStatus(roomId, id) {
+                localStorage.setItem("userid", id);
+                const xhr = new XMLHttpRequest();
+                xhr.open("GET", "check_game_ready.php?roomId=" + roomId, true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        const response = JSON.parse(xhr.responseText);
+                        if (response.success && response.gameReady) {
+                            // La room est prête, redirigez vers la page de jeu
+                            window.location.href = response.redirect_url;
+                        }
+                    }
+                };
+
+                xhr.send();
+            }
+
+            function temps() {
+                if (time == 0) {
+                    document.getElementById("message").textContent = "Attente du deuxième joueur";
+                }else{document.getElementById("message").textContent += ".";}
+                time+=1
+                if (time>3) {
+                    time=0
+                }
+            }
+        </script>
+    </body>
+    </html>
