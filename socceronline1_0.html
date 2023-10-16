@@ -10,6 +10,10 @@
         background-color: rgb(0, 115, 0);
         overflow: hidden;
       }
+      @font-face {
+        font-family: comic;
+        src: url(Comic_Neue/ComicNeue-Bold.ttf);
+      }
       .container {
         display: flex;
         justify-content: center;
@@ -249,7 +253,7 @@
         ctx.closePath();
         ctx.stroke();
 
-        ctx.font="65px Cursive"
+        ctx.font="65px comic"
         ctx.fillText("Player 1",100,80)
         ctx.fillText(score1,535,80)
         ctx.fillText("-", 585,80)
