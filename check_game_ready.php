@@ -1,20 +1,16 @@
 <?php
 $servername = "localhost";
-$username ="DBuser9_77";
-$password ="12345";
-$dbname ="DB9db77";
+$username ="root";
+$password ="";
+$dbname ="db3306";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 if ($conn->connect_error) {
     die("La connexion à la base de données a échoué : " . $conn->connect_error);
 }
-
-// Récupérez le nom d'utilisateur de la requête AJAX (si nécessaire)
 $roomId = $_GET["roomId"];
-// $username = $_POST["username"];
 
-// Vérifiez l'état de game_ready pour la room spécifiée
 $sql = "SELECT game_ready FROM rooms WHERE id = $roomId";
 $result = $conn->query($sql);
 
@@ -34,7 +30,6 @@ if ($result->num_rows > 0) {
     ];
 }
 
-// Définissez l'en-tête de réponse pour indiquer que c'est du JSON
 header('Content-Type: application/json');
 echo json_encode($response);
 
